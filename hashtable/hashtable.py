@@ -7,6 +7,51 @@ class HashTableEntry:
         self.value = value
         self.next = None
 
+    def __str__(self):
+        f'{self.key}, {self.value}'
+
+class HashLinkedList:
+    def __init__(self):
+        self.head = None
+    
+    def find(self, key):
+        current = self.head
+
+        while current is not None:
+            if current.key == key:
+                return current
+            current = current.next
+
+        return None
+
+    def add_to_head(self, key, value):
+        node = HashTableEntry(key, value)
+
+        if self.head is not None:
+            node.next = self.head
+
+        self.head = node
+
+    def delete(self, key):
+        current = self.head
+        # if there is nothing to delete
+        if current is None:
+            return None
+        # if deleting the head
+        if current.key == key:
+            self.head = current.next
+            return current
+        # when deleting anything else
+        else:
+            previous = current
+            current = current.next
+
+            while current is not None:
+                if current.key == key:
+                    previous.next = current.next #get rid of current
+                    return current #return the deleted node
+
+            return None #else nothing was found
 
 # Hash table can't have fewer than this many slots
 MIN_CAPACITY = 8
@@ -24,6 +69,10 @@ class HashTable:
         # Your code here
         self.capacity = capacity
         self.table = [None] * capacity
+        self.item_count = 0 
+
+        for num in range(self.capacity):
+            self.table[num] = HashLinkedList()
 
 
     def get_num_slots(self):
@@ -37,7 +86,7 @@ class HashTable:
         Implement this.
         """
         # Your code here
-
+        return self.capacity
 
     def get_load_factor(self):
         """
@@ -46,7 +95,7 @@ class HashTable:
         Implement this.
         """
         # Your code here
-
+        return self.item_count / self.capacity
 
     def fnv1(self, key):
         """
@@ -87,8 +136,20 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        load_factor = self.get_load_factor()
+        if load_factor > 0.7:
+            self.resize(self.capacity * 2)
+
+        # get the hash index
         index = self.hash_index(key)
-        self.table[index] = value
+        # check if there is already an existing node for this key
+        existing_node = self.table[index].find(key)
+
+        if existing_node is not None:
+            existing_node.value = value
+        else:
+            self.table[index].add_to_head(key, value)
+            self.item_count += 1
 
 
     def delete(self, key):
@@ -100,12 +161,14 @@ class HashTable:
         Implement this.
         """
         # Your code here
-        target = self.hash_index(key)
-        deleted = self.table[target]
-        if deleted:
-            self.table[target] = None
-        else:
+        index = self.hash_index(key)
+        # delete from LL
+        deleted = self.table[index].delete(key)
+
+        if deleted is None:
             print("Sorry, key was not found")
+        else:
+            self.item_count -= 1
 
     def get(self, key):
         """
@@ -116,9 +179,12 @@ class HashTable:
         Implement this.
         """
         # Your code here
-        find_index = self.hash_index(key)
-        result = self.table[find_index]
-        return result
+        index = self.hash_index(key)
+        # find result from LL
+        result = self.table[index].find(key)
+        if result is None:
+            return None
+        return result.value
 
     def resize(self, new_capacity):
         """
@@ -128,6 +194,29 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        # save the old table
+        old_table = self.table
+        # creat a new table with new capacity
+        new_table = [None] * new_capacity
+
+        for num in range(new_capacity):
+            new_table[num] = HashLinkedList()
+        # update table
+        self.table = new_table
+        # update capacity
+        self.capacity = new_capacity
+        # reset item count
+        self.item_count = 0
+        # iterate through previous array
+        for el in old_table:
+            current = el.head
+
+            while current is not None:
+                # store in the new array
+                self.put(current.key, current.value)
+
+                current = current.next
+
 
 
 
