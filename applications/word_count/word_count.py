@@ -1,5 +1,25 @@
 def word_count(s):
-    # Your code here
+    count = {}
+    sentence = s.split()
+    ignored = {'"', ':', ';', ',', '.', '-', '+', '=', '/',
+               '|', '[', ']', '{', '}', '(', ')', '*', '^', '&', '\\'}
+
+
+    for el in range(len(sentence)):
+        strip_word = ""
+        for char in range(len(sentence[el])):
+            if sentence[el][char] not in ignored:
+                strip_word += sentence[el][char]
+        sentence[el] = strip_word.lower()
+        
+    for word in sentence:
+        if word == "":
+            return {}
+        if word in count:
+            count[word] += 1
+        else:
+            count[word] = 1
+    return count 
 
 
 
