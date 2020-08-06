@@ -1,5 +1,13 @@
 def no_dups(s):
-    # Your code here
+    count = {}
+    words = s.split()
+
+    for word in words:
+        count[word] = True
+
+    noDups = " ".join(count).rstrip()
+    return noDups
+
 
 
 
